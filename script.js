@@ -77,47 +77,90 @@ function groupDataByCategory(rows) {
     return grouped;
 }
 
-// NEW: Render the Category View
+// NEW: Render the Category View (Sorted by Popularity)
 function renderCategoryFeed(groupedData) {
     const container = document.getElementById('main-feed');
 
-    // Sort categories using our weight helper
+    // 1. Sort categories by weight
     const sortedCategories = Object.keys(groupedData).sort((a, b) => {
         return getCategoryWeight(a) - getCategoryWeight(b);
     });
 
     const html = sortedCategories.map(category => {
-        const items = groupedData[category];
+        const rawItems = groupedData[category];
         const [bg, text, border] = getCategoryColorDark(category);
         const icon = getCategoryIcon(category);
 
-        // Sort items inside category alphabetically
-        items.sort((a, b) => a.title.localeCompare(b.title));
+        // 2. CONSOLIDATE DUPLICATES
+        const consolidatedMap = {};
 
+        rawItems.forEach(item => {
+            const key = item.title.trim().toLowerCase();
+            if (!consolidatedMap[key]) {
+                consolidatedMap[key] = {
+                    displayTitle: item.title,
+                    pickers: [],
+                    notes: []
+                };
+            }
+            consolidatedMap[key].pickers.push(item.who);
+            if (item.note && item.note.trim() !== "") {
+                consolidatedMap[key].notes.push({ who: item.who, text: item.note });
+            }
+        });
+
+        const items = Object.values(consolidatedMap);
+
+        // 3. SORT ITEMS
+        items.sort((a, b) => {
+            const aHasNotes = a.notes.length > 0;
+            const bHasNotes = b.notes.length > 0;
+            
+            // Rule 1: Separation (Notes go to the bottom)
+            if (aHasNotes && !bHasNotes) return 1;
+            if (!aHasNotes && bHasNotes) return -1;
+            
+            // Rule 2: Popularity (Most references first)
+            // This now applies to BOTH groups (notes and no-notes)
+            if (a.pickers.length !== b.pickers.length) {
+                return b.pickers.length - a.pickers.length; // Descending
+            }
+            
+            // Rule 3: Alphabetical
+            return a.displayTitle.localeCompare(b.displayTitle);
+        });
+
+        // 4. GENERATE HTML
         const listHtml = items.map(item => {
-            // Get the picker's color for their badge
-            let pickerColor = "#eee";
-            const configName = Object.keys(CONFIG.colors).find(key => item.who.includes(key));
-            if (configName) pickerColor = CONFIG.colors[configName];
+            const tagsHtml = item.pickers.map(personName => {
+                let pickerColor = CONFIG.defaultColor;
+                const configName = Object.keys(CONFIG.colors).find(key => personName.includes(key));
+                if (configName) pickerColor = CONFIG.colors[configName];
+                
+                return `<span class="picker-tag" style="background:${pickerColor};">${personName}</span>`;
+            }).join('');
 
-            // If there's a note, show it
-            const noteHtml = item.note ? `<div class="note" style="margin-top:5px;">"${item.note}"</div>` : '';
+            const notesHtml = item.notes.map(noteObj => 
+                `<div class="note" style="margin-top:8px;">
+                    <strong>${noteObj.who}:</strong> "${noteObj.text}"
+                </div>`
+            ).join('');
 
             return `
-            <div class="item-row ${item.note ? 'detailed' : ''}">
+            <div class="item-row ${item.notes.length > 0 ? 'detailed' : ''}">
                 <div class="row-content">
-                    <div class="title">
-                        ${item.title} 
-                        <span class="picker-tag" style="background:${pickerColor};">${item.who}</span>
+                    <div class="title" style="line-height: 1.8;">
+                        ${item.displayTitle} 
+                        ${tagsHtml}
                     </div>
-                    ${noteHtml}
+                    ${notesHtml}
                 </div>
             </div>`;
         }).join('');
 
         return `
             <div class="friend-section">
-                <div class="friend-header" style="background-color: ${bg}; color: #222;">
+                <div class="friend-header" style="background-color: ${bg}; color: #000;">
                     ${icon} &nbsp; ${category}
                 </div>
                 <div class="friend-body">
