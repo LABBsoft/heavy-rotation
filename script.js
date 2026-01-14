@@ -6,11 +6,11 @@ const CONFIG = {
     csvFile: '2025_favourites.csv',
     colors: {
         "Alyssa Shaver": "#E1EAD1", // Sage
-        "Khamil": "#F4E1E1",        // Rose
-        "Callum": "#E1E7F0",        // Steel
-        "Reid": "#F9F1D0",          // Gold
-        "Alex": "#E8E1F4",          // Lavender
-        "Sisley": "#FCEAD5",        // Peach
+        "Khamil Alhade": "#F4E1E1",        // Rose
+        "Callum Summers": "#E1E7F0",        // Steel
+        "Reid McLaughlin": "#F9F1D0",          // Gold
+        "Alex Sutherland": "#E8E1F4",          // Lavender
+        "Sisley Comish": "#FCEAD5",        // Peach
         "Patrick Chin": "#DDF2EB",  // Mint
         "Gabby Bzorek": "#F2D8C9",  // Terracotta
         "Angela Tollis": "#D6EAF8", // Sky

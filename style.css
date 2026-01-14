@@ -131,15 +131,17 @@ body {
 }
 
 .category-accordion summary {
-  padding: 15px 25px;
-  cursor: pointer;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  list-style: none; /* Hides default arrow */
+    padding: 15px 25px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+    
+    /* Ensure category titles are dark */
+    color: #222; 
 }
-
 /* Custom indicator arrow */
 .category-accordion summary::after {
   content: "+";
@@ -219,12 +221,15 @@ h1 {
 
 /* FRIEND CARDS */
 .friend-section {
-  background: white;
-  border-radius: var(--radius);
-  margin-bottom: 50px;
-  box-shadow: var(--card-shadow);
-  overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.03);
+    background: white;
+    border-radius: var(--radius);
+    margin-bottom: 50px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    
+    /* THE FIX: Reset text color to dark for inside the card */
+    color: #222; 
 }
 
 .friend-header {
