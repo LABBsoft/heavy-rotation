@@ -175,48 +175,90 @@ function renderMainFeed(groupedData) {
     container.innerHTML = html;
 }
 
+function getCategoryIcon(category) {
+    const c = category.toLowerCase();
+    if (c.includes('movie')) return '🎬';
+    if (c.includes('tv')) return '📺';
+    if (c.includes('book')) return '📚';
+    if (c.includes('song') || c.includes('music')) return '🎵';
+    if (c.includes('album')) return '💿';
+    if (c.includes('artist')) return '🎤';
+    if (c.includes('game')) return '🎮';
+    if (c.includes('photo')) return '📸';
+    return '🔹';
+}
+
+function getCategoryColor(category) {
+    const c = category.toLowerCase();
+    // Returns: [Background, Text, Border/Hover]
+    if (c.includes("movie")) return ["#E3F2FD", "#1565C0", "#90CAF9"]; 
+    if (c.includes("tv")) return ["#E8F5E9", "#2E7D32", "#A5D6A7"];
+    if (c.includes("book")) return ["#FFF3E0", "#EF6C00", "#FFCC80"];
+    if (c.includes("song") || c.includes("music") || c.includes("artist") || c.includes("album")) return ["#F3E5F5", "#7B1FA2", "#CE93D8"];
+    if (c.includes("game")) return ["#ECEFF1", "#455A64", "#B0BEC5"];
+    if (c.includes("photo")) return ["#FFE0B2", "#E65100", "#FFCC80"];
+    
+    // Default (Grey)
+    return ["#F5F5F5", "#444", "#E0E0E0"];
+}
+
+// UPDATED: Renders content split by Type (Simple vs Detailed) rather than Category
 function renderCategoryList(categoriesObj) {
-    return Object.keys(categoriesObj).map(category => {
+    let allSimpleItems = [];
+    let allDetailedItems = [];
+
+    // 1. Flatten the data
+    Object.keys(categoriesObj).forEach(category => {
         const items = categoriesObj[category];
+        items.forEach(item => {
+            const itemWithCat = { ...item, category };
+            if (!item.note || item.note.trim() === "") {
+                allSimpleItems.push(itemWithCat);
+            } else {
+                allDetailedItems.push(itemWithCat);
+            }
+        });
+    });
+
+    let html = "";
+
+    // 2. RENDER THE UNIFIED CLOUD (Colored & Bigger)
+    if (allSimpleItems.length > 0) {
+        const pills = allSimpleItems.map(item => {
+            const icon = getCategoryIcon(item.category);
+            const [bg, text, border] = getCategoryColor(item.category);
+            
+            // Inject colors directly into the span
+            return `<span class="simple-pill" 
+                          title="${item.category}" 
+                          style="background-color: ${bg}; color: ${text}; border-color: ${border};">
+                <span class="pill-icon">${icon}</span> ${item.title}
+            </span>`;
+        }).join('');
         
-        // SPLIT: Items with notes vs. items without
-        const simpleItems = items.filter(i => !i.note || i.note.trim() === "");
-        const detailedItems = items.filter(i => i.note && i.note.trim() !== "");
+        html += `<div class="pill-cloud">${pills}</div>`;
+    }
 
-        let categoryHtml = "";
-
-        // 1. THE PILL CLOUD (Speed Round)
-        if (simpleItems.length > 0) {
-            const pills = simpleItems.map(item => 
-                `<span class="simple-pill">${item.title}</span>`
-            ).join('');
-            categoryHtml += `<div class="pill-cloud">${pills}</div>`;
-        }
-
-        // 2. THE DETAILED ROWS (Story Time)
-        if (detailedItems.length > 0) {
-            const rows = detailedItems.map(item => `
+    // 3. RENDER THE DETAILED ROWS
+    if (allDetailedItems.length > 0) {
+        const rows = allDetailedItems.map(item => {
+            const icon = getCategoryIcon(item.category);
+            return `
                 <div class="item-row detailed">
+                    <div class="row-icon">${icon}</div>
                     <div class="row-content">
                         <div class="title">${item.title}</div>
                         <div class="note">"${item.note}"</div>
                     </div>
                 </div>
-            `).join('');
-            // Add a divider if we have both pills and rows
-            const borderClass = simpleItems.length > 0 ? "border-top" : "";
-            categoryHtml += `<div class="detailed-list ${borderClass}">${rows}</div>`;
-        }
+            `;
+        }).join('');
+        
+        const borderClass = allSimpleItems.length > 0 ? "border-top" : "";
+        html += `<div class="detailed-list ${borderClass}">${rows}</div>`;
+    }
 
-        return `
-            <div class="category-group">
-                <div class="category-header">${category}</div>
-                <div class="category-content">
-                    ${categoryHtml}
-                </div>
-            </div>
-        `;
-    }).join('');
+    return html;
 }
 
 // Helper for the colored category pills
