@@ -151,7 +151,14 @@ function renderMainFeed(groupedData) {
     
     const html = Object.keys(groupedData).map(name => {
         const categoriesObj = groupedData[name];
-        const headerColor = CONFIG.colors[name] || CONFIG.defaultColor;
+        
+        // FIX: Fuzzy match the name to find the color
+        // (Finds "Callum" color even if CSV says "Callum Summers")
+        let headerColor = CONFIG.defaultColor;
+        const configName = Object.keys(CONFIG.colors).find(key => name.includes(key));
+        if (configName) {
+            headerColor = CONFIG.colors[configName];
+        }
 
         return `
             <div class="friend-section">
@@ -159,7 +166,7 @@ function renderMainFeed(groupedData) {
                     ${name}
                 </div>
                 <div class="friend-body">
-                    ${renderCategoryAccordions(categoriesObj)}
+                    ${renderCategoryList(categoriesObj)}
                 </div>
             </div>
         `;
@@ -169,7 +176,7 @@ function renderMainFeed(groupedData) {
 }
 
 // Helper to render the accordions for a specific friend
-function renderCategoryAccordions(categoriesObj) {
+function renderCategoryList(categoriesObj) {
     return Object.keys(categoriesObj).map(category => {
         const items = categoriesObj[category];
         const listHtml = items.map(item => `
@@ -180,19 +187,17 @@ function renderCategoryAccordions(categoriesObj) {
         `).join('');
 
         return `
-            <details class="category-accordion">
-                <summary>
+            <div class="category-group">
+                <div class="category-header">
                     ${category} 
-                    <span class="item-count">${items.length}</span>
-                </summary>
-                <div class="accordion-content">
+                </div>
+                <div class="category-content">
                     ${listHtml}
                 </div>
-            </details>
+            </div>
         `;
     }).join('');
 }
-
 // Helper for the colored category pills
 function createCategoryBadge(category) {
     const c = category ? category.toLowerCase() : "";

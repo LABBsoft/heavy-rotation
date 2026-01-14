@@ -124,34 +124,42 @@ body {
   margin-bottom: 8px;
   line-height: 1.2;
 }
-/* Accordion Styling */
-.category-accordion {
-  border-bottom: 1px solid var(--border-color);
-  background: #fff;
+/* CATEGORY SUB-HEADERS (Replaces Accordions) */
+.category-group {
+    padding-bottom: 10px;
 }
 
-.category-accordion summary {
-    padding: 15px 25px;
-    cursor: pointer;
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    list-style: none;
-    
-    /* Ensure category titles are dark */
-    color: #222; 
-}
-/* Custom indicator arrow */
-.category-accordion summary::after {
-  content: "+";
-  font-family: monospace;
-  font-size: 1.2rem;
-  color: var(--text-muted);
+.category-header {
+    background: #fcfcfc;
+    padding: 12px 25px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #eee;
+    border-top: 1px solid #eee;
 }
 
-.category-accordion[open] summary::after {
-  content: "−"; /* Minus sign for open state */
+/* Remove border from the first header so it looks clean against the colored bar */
+.category-group:first-child .category-header {
+    border-top: none;
+}
+
+
+/* Ensure the item rows look good in this list */
+.item-row {
+    display: grid;
+    /* Removed the badge column since the header tells us the category */
+    grid-template-columns: 1fr 2fr; 
+    gap: 15px;
+    padding: 15px 30px;
+    border-bottom: 1px solid #f9f9f9;
+    align-items: baseline;
+}
+
+.item-row:last-child {
+    border-bottom: none;
 }
 
 .item-count {
