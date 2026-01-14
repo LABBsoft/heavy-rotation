@@ -268,6 +268,70 @@ h1 {
   background: #fafafa;
 }
 
+/* --- THE SPEED ROUND (Pill Cloud) --- */
+.pill-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px 25px;
+    background: #fff;
+}
+
+.simple-pill {
+    background: #f0f2f5;
+    color: #444;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.simple-pill:hover {
+    background: #e1e4e8;
+}
+
+/* --- THE DETAILED LIST (Items with Notes) --- */
+.detailed-list {
+    background: #fff;
+}
+
+.detailed-list.border-top {
+    border-top: 1px dashed #eee; /* Visual separator between pills and rows */
+}
+
+/* UPDATED ITEM ROW STYLE */
+.item-row {
+    padding: 25px 30px;
+    border-bottom: 1px solid #f5f5f5;
+    display: flex;
+    align-items: flex-start;
+}
+
+.item-row:last-child {
+    border-bottom: none;
+}
+
+.item-row.detailed .title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.item-row.detailed .note {
+    font-size: 0.95rem;
+    color: #555;
+    font-style: italic;
+    line-height: 1.6;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 0 12px 12px 12px; /* Speech bubble rounded corner */
+    border-left: 3px solid #ddd;
+    margin-top: 5px;
+}
+
 /* PILLS & BADGES */
 .pill {
   display: inline-block;

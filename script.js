@@ -175,29 +175,50 @@ function renderMainFeed(groupedData) {
     container.innerHTML = html;
 }
 
-// Helper to render the accordions for a specific friend
 function renderCategoryList(categoriesObj) {
     return Object.keys(categoriesObj).map(category => {
         const items = categoriesObj[category];
-        const listHtml = items.map(item => `
-            <div class="item-row">
-                <div class="title">${item.title}</div>
-                <div class="note">${item.note}</div>
-            </div>
-        `).join('');
+        
+        // SPLIT: Items with notes vs. items without
+        const simpleItems = items.filter(i => !i.note || i.note.trim() === "");
+        const detailedItems = items.filter(i => i.note && i.note.trim() !== "");
+
+        let categoryHtml = "";
+
+        // 1. THE PILL CLOUD (Speed Round)
+        if (simpleItems.length > 0) {
+            const pills = simpleItems.map(item => 
+                `<span class="simple-pill">${item.title}</span>`
+            ).join('');
+            categoryHtml += `<div class="pill-cloud">${pills}</div>`;
+        }
+
+        // 2. THE DETAILED ROWS (Story Time)
+        if (detailedItems.length > 0) {
+            const rows = detailedItems.map(item => `
+                <div class="item-row detailed">
+                    <div class="row-content">
+                        <div class="title">${item.title}</div>
+                        <div class="note">"${item.note}"</div>
+                    </div>
+                </div>
+            `).join('');
+            // Add a divider if we have both pills and rows
+            const borderClass = simpleItems.length > 0 ? "border-top" : "";
+            categoryHtml += `<div class="detailed-list ${borderClass}">${rows}</div>`;
+        }
 
         return `
             <div class="category-group">
-                <div class="category-header">
-                    ${category} 
-                </div>
+                <div class="category-header">${category}</div>
                 <div class="category-content">
-                    ${listHtml}
+                    ${categoryHtml}
                 </div>
             </div>
         `;
     }).join('');
 }
+
 // Helper for the colored category pills
 function createCategoryBadge(category) {
     const c = category ? category.toLowerCase() : "";
