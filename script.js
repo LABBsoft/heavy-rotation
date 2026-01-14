@@ -4,19 +4,20 @@
  */
 const CONFIG = {
     csvFile: '2025_favourites.csv',
-    colors: {
-        "Alyssa Shaver": "#E1EAD1", // Sage
-        "Khamil Alhade": "#F4E1E1",        // Rose
-        "Callum Summers": "#E1E7F0",        // Steel
-        "Reid McLaughlin": "#F9F1D0",          // Gold
-        "Alex Sutherland": "#E8E1F4",          // Lavender
-        "Sisley Comish": "#FCEAD5",        // Peach
-        "Patrick Chin": "#DDF2EB",  // Mint
-        "Gabby Bzorek": "#F2D8C9",  // Terracotta
-        "Angela Tollis": "#D6EAF8", // Sky
-        "Luciano Abbott": "#E5E7E9",// Slate
-        "Avery Cole": "#F5E8C7",    // Dusty Gold
-        "Ryan Kasor": "#D9E3D0"     // Zen Green
+colors: {
+        // MOONLIT PASTELS (Desaturated & Soft)
+        "Alyssa Shaver": "#C8E6C9", // Tea Green
+        "Khamil": "#F8BBD0",        // Soft Pink
+        "Callum": "#D1C4E9",        // Muted Violet
+        "Reid": "#FFF9C4",          // Pale Cream
+        "Alex": "#BBDEFB",          // Pale Blue
+        "Sisley": "#B2EBF2",        // Soft Cyan
+        "Patrick Chin": "#B2DFDB",  // Muted Teal
+        "Gabby Bzorek": "#FFCCBC",  // Deep Peach
+        "Angela Tollis": "#E1F5FE", // Ice Blue
+        "Luciano Abbott": "#CFD8DC",// Blue Grey
+        "Avery Cole": "#F0F4C3",    // Lime Cream
+        "Ryan Kasor": "#DCEDC8"     // Moss Mist
     },
     defaultColor: "#eee"
 };
@@ -146,14 +147,45 @@ function renderHighlights(items) {
 }
 
 // Renders the main list of friends
+// Renders the main list of friends, SORTED by content density
 function renderMainFeed(groupedData) {
     const container = document.getElementById('main-feed');
     
-    const html = Object.keys(groupedData).map(name => {
+    // 1. Convert Object to Array so we can sort it
+    const friendsList = Object.keys(groupedData).map(name => {
         const categoriesObj = groupedData[name];
         
-        // FIX: Fuzzy match the name to find the color
-        // (Finds "Callum" color even if CSV says "Callum Summers")
+        // Calculate stats for sorting
+        let totalCount = 0;
+        let noteCount = 0;
+        
+        Object.values(categoriesObj).forEach(items => {
+            totalCount += items.length;
+            items.forEach(item => {
+                if (item.note && item.note.trim() !== "") {
+                    noteCount++;
+                }
+            });
+        });
+
+        return { name, categoriesObj, totalCount, noteCount };
+    });
+
+    // 2. SORTING LOGIC
+    // Primary: Fewest notes first
+    // Secondary: Fewest total items first
+    friendsList.sort((a, b) => {
+        if (a.noteCount !== b.noteCount) {
+            return a.noteCount - b.noteCount; 
+        }
+        return a.totalCount - b.totalCount;
+    });
+
+    // 3. RENDER
+    const html = friendsList.map(friend => {
+        const { name, categoriesObj } = friend;
+        
+        // Fuzzy match for color
         let headerColor = CONFIG.defaultColor;
         const configName = Object.keys(CONFIG.colors).find(key => name.includes(key));
         if (configName) {
@@ -175,6 +207,19 @@ function renderMainFeed(groupedData) {
     container.innerHTML = html;
 }
 
+function getCategoryWeight(category) {
+    const c = category.toLowerCase();
+    if (c.includes('movie')) return 1;
+    if (c.includes('tv') || c.includes('show') || c.includes('anime')) return 2;
+    if (c.includes('book')) return 3;
+    if (c.includes('game')) return 9;
+    if (c.includes('album')) return 5;
+    if (c.includes('song')) return 6;
+    if (c.includes('artist')) return 7;
+    if (c.includes('photo')) return 8;
+    return 99; // Everything else (e.g. "Other") goes to the end
+}
+
 function getCategoryIcon(category) {
     const c = category.toLowerCase();
     if (c.includes('movie')) return '🎬';
@@ -185,6 +230,7 @@ function getCategoryIcon(category) {
     if (c.includes('artist')) return '🎤';
     if (c.includes('game')) return '🎮';
     if (c.includes('photo')) return '📸';
+    if (c.includes('concert')) return '🏟️';
     return '🔹';
 }
 
@@ -220,15 +266,25 @@ function renderCategoryList(categoriesObj) {
         });
     });
 
+    // 2. SORTING LOGIC (Category Weight -> Alphabetical Title)
+    const sortFn = (a, b) => {
+        const wA = getCategoryWeight(a.category);
+        const wB = getCategoryWeight(b.category);
+        if (wA !== wB) return wA - wB; // Sort by category priority
+        return a.title.localeCompare(b.title); // Then by title
+    };
+
+    allSimpleItems.sort(sortFn);
+    allDetailedItems.sort(sortFn);
+
     let html = "";
 
-    // 2. RENDER THE UNIFIED CLOUD (Colored & Bigger)
+    // 3. RENDER THE UNIFIED CLOUD
     if (allSimpleItems.length > 0) {
         const pills = allSimpleItems.map(item => {
             const icon = getCategoryIcon(item.category);
             const [bg, text, border] = getCategoryColor(item.category);
             
-            // Inject colors directly into the span
             return `<span class="simple-pill" 
                           title="${item.category}" 
                           style="background-color: ${bg}; color: ${text}; border-color: ${border};">
@@ -239,7 +295,7 @@ function renderCategoryList(categoriesObj) {
         html += `<div class="pill-cloud">${pills}</div>`;
     }
 
-    // 3. RENDER THE DETAILED ROWS
+    // 4. RENDER THE DETAILED ROWS
     if (allDetailedItems.length > 0) {
         const rows = allDetailedItems.map(item => {
             const icon = getCategoryIcon(item.category);
