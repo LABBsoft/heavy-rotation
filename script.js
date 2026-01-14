@@ -29,6 +29,7 @@ Papa.parse(csvFile, {
         if(loader) loader.style.display = 'none';
         
         // Start processing
+        renderHighlights(results.data)
         processData(results.data);
     },
     error: function(err) {
@@ -108,3 +109,45 @@ function getPill(cat) {
 
     return `<span class="pill" style="background:${bg}; color:${text};">${cat}</span>`;
 }
+
+function renderHighlights(rows) {
+    const counts = {};
+    
+    rows.forEach(row => {
+        const title = row[2];
+        const cat = row[1];
+        if (!title || title === "Item") return;
+
+        // Clean title for matching (ignore case and "Season X")
+        const cleanTitle = title.toLowerCase().split(' s')[0].split(' season')[0].trim();
+        
+        if (!counts[cleanTitle]) {
+            counts[cleanTitle] = { display: title, count: 0, category: cat };
+        }
+        counts[cleanTitle].count++;
+    });
+
+    // Filter for items with 2 or more mentions
+    const topPicks = Object.values(counts)
+        .filter(item => item.count > 1)
+        .sort((a, b) => b.count - a.count);
+
+    const highlightContainer = document.getElementById('highlight-cards');
+    
+    topPicks.slice(0, 4).forEach(pick => {
+        const card = document.createElement('div');
+        card.className = 'highlight-card';
+        card.innerHTML = `
+            <span class="count">${pick.count} MENTIONS</span>
+            <span class="title">${pick.display}</span>
+            <div style="margin-top:10px;">${getPill(pick.category)}</div>
+        `;
+        highlightContainer.appendChild(card);
+    });
+}
+
+// Update your Papa.parse complete function to call this:
+// complete: function(results) {
+//    renderHighlights(results.data);
+//    processData(results.data);
+// }
