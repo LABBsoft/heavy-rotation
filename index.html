@@ -1,35 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Heavy Rotation | 2025</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="script.js" defer></script>
-</head>
-<body>
+  </head>
+  <body>
+    <div class="night-sky">
+      <div class="stars"></div>
+      <div class="twinkling"></div>
+      <div class="cloud-container">
+        <div class="cloud"></div>
+      </div>
+    </div>
 
-<div class="container">
-    <header>
+    <div class="container">
+      <header>
         <h1><span class="record-icon"></span> HEAVY ROTATION</h1>
         <div class="subtitle">The 2025 Collective Yearbook</div>
-    </header>
+      </header>
 
-    <section class="intro-section">
-        <h2>A Year in Review 🥂</h2>
-        <p>A huge thank you to everyone who contributed! This project is a snapshot of our collective taste over the last year. Whether it was a song on repeat, a book that kept us up, or a show we couldn't stop talking about—thank you for sharing your 2025 favorites.</p>
-    </section>
+      <section class="intro-section">
+        <div class="intro-text">
+          <p>
+            Thank you so much to everyone who contributed to this project! It’s
+            been a lot of fun seeing what everyone was into this past year.
+          </p>
 
-    <section class="highlights-section">
-        <h3 class="section-label">Community Favorites 🏆</h3>
-        <div id="highlight-cards" class="highlight-grid">
-            </div>
-    </section>
+          <p>
+            This page is meant to be a fun time capsule of our favorites from
+            2025.
+          </p>
+        </div>
+      </section>
 
-    <div id="loading">Loading the tracks...</div>
-    <div id="main-feed"></div>
-</div>
+      <section class="highlights-section">
+        <div class="hof-header">
+          <h3 class="hof-title">2025's Hall of Fame</h3>
+          <p class="hof-subtitle">
+            These standouts had three mentions each
+          </p>
+        </div>
+        <div id="highlight-cards" class="highlight-grid"></div>
+      </section>
 
-</body>
+      <div id="loading">Loading the tracks...</div>
+      <div id="main-feed"></div>
+    </div>
+  </body>
 </html>

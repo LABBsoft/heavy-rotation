@@ -1,180 +1,409 @@
 :root {
-    --bg-color: #FAFAFA;
-    --text-main: #222;
-    --text-muted: #666;
-    --card-shadow: 0 8px 24px rgba(0,0,0,0.04);
-    --radius: 12px;
+  --bg-color: #fafafa;
+  --text-main: #222;
+  --text-muted: #666;
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  --radius: 12px;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    margin: 0;
-    padding: 60px 20px;
-    line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: transparent;
+  
+  /* CHANGED: Text must be white to show up on the Night Sky */
+  color: white; 
+  
+  margin: 0;
+  padding: 60px 20px;
+  line-height: 1.5;
+  min-height: 100vh;
 }
 
-.container { max-width: 800px; margin: 0 auto; }
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
 
 /* INTRO STYLES */
 .intro-section {
-    text-align: center;
-    max-width: 600px;
-    margin: 0 auto 60px auto;
-    line-height: 1.6;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 60px auto;
+  line-height: 1.6;
 }
 
-.intro-section h2 { font-weight: 800; letter-spacing: -0.5px; }
-
-/* HIGHLIGHT CARDS */
-.section-label {
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 0.8rem;
-    color: #999;
-    text-align: center;
-    margin-bottom: 20px;
+.intro-section h2 {
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-.highlight-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+/* HALL OF FAME CARDS */
+
+/* HALL OF FAME HEADER (The missing piece) */
+.highlights-section {
     margin-bottom: 80px;
 }
 
-.highlight-card {
-    background: white;
-    padding: 20px;
-    border-radius: var(--radius);
-    box-shadow: var(--card-shadow);
-    border: 1px solid #eee;
+.hof-header {
     text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1); /* Subtle divider */
 }
 
-.highlight-card .count {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #888;
-    margin-bottom: 10px;
+.hof-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0;
+    color: #fff; /* White text to pop against the night sky */
+    letter-spacing: -1px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.hof-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.7); /* Slightly transparent white */
+    margin-top: 10px;
+    font-weight: 400;
+}
+
+.highlight-grid {
+  display: grid;
+  /* This makes them taller, like movie posters */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.highlight-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden; /* Keeps the image corners rounded */
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.highlight-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* New Image Area */
+.card-image-container {
+  width: 100%;
+  aspect-ratio: 2/3; /* Standard movie poster ratio */
+  background: #eee;
+  overflow: hidden;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures image fills the box without stretching */
+}
+
+/* Title Area */
+.card-content {
+  padding: 20px;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .highlight-card .title {
-    display: block;
-    font-size: 1.1rem;
-    margin-bottom: 5px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #222;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+/* Accordion Styling */
+.category-accordion {
+  border-bottom: 1px solid var(--border-color);
+  background: #fff;
+}
+
+.category-accordion summary {
+  padding: 15px 25px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none; /* Hides default arrow */
+}
+
+/* Custom indicator arrow */
+.category-accordion summary::after {
+  content: "+";
+  font-family: monospace;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+.category-accordion[open] summary::after {
+  content: "−"; /* Minus sign for open state */
+}
+
+.item-count {
+  font-size: 0.8rem;
+  color: #999;
+  font-weight: 400;
+  margin-left: auto;
+  margin-right: 15px;
+}
+
+.accordion-content {
+  padding: 0 25px 20px 25px;
+}
+
+/* Adjust item-row for a nested look */
+.accordion-content .item-row {
+  grid-template-columns: 1fr 2fr; /* Removed pill col since the accordion header labels it */
+  gap: 15px;
+  border-bottom: 1px solid #f9f9f9;
 }
 
 /* HEADER BRANDING */
-header { text-align: center; margin-bottom: 80px; }
+header {
+  text-align: center;
+  margin-bottom: 80px;
+}
 
-h1 { 
-    font-size: 3.5rem; 
-    margin: 0; 
-    letter-spacing: -2px; 
-    font-weight: 800; 
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
+h1 {
+  font-size: 3.5rem;
+  margin: 0;
+  letter-spacing: -2px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
 }
 
 /* The "Rotation" Icon */
 .record-icon {
-    width: 40px; 
-    height: 40px; 
-    border: 4px solid #333; 
-    border-radius: 50%; 
-    position: relative;
-    display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #333;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
 }
 .record-icon::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px; height: 10px;
-    background: #333;
-    border-radius: 50%;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #333;
+  border-radius: 50%;
 }
 
 .subtitle {
-    margin-top: 10px;
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  margin-top: 10px;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* FRIEND CARDS */
 .friend-section {
-    background: white;
-    border-radius: var(--radius);
-    margin-bottom: 50px;
-    box-shadow: var(--card-shadow);
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.03);
+  background: white;
+  border-radius: var(--radius);
+  margin-bottom: 50px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .friend-header {
-    padding: 25px 30px;
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: #222;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 25px 30px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #222;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* DATA GRID */
 .item-row {
-    display: grid;
-    grid-template-columns: 110px 2fr 3fr; /* Badge | Title | Note */
-    padding: 18px 30px;
-    border-bottom: 1px solid #f4f4f4;
-    align-items: baseline;
-    gap: 20px;
-    transition: background 0.1s;
+  display: grid;
+  grid-template-columns: 110px 2fr 3fr; /* Badge | Title | Note */
+  padding: 18px 30px;
+  border-bottom: 1px solid #f4f4f4;
+  align-items: baseline;
+  gap: 20px;
+  transition: background 0.1s;
 }
-.item-row:last-child { border-bottom: none; }
-.item-row:hover { background: #fafafa; }
+.item-row:last-child {
+  border-bottom: none;
+}
+.item-row:hover {
+  background: #fafafa;
+}
 
 /* PILLS & BADGES */
 .pill {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-align: center;
-    width: fit-content;
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  width: fit-content;
 }
 
-.title { font-weight: 600; font-size: 1.05rem; color: #111; }
+.title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #111;
+}
 
 .note {
-    font-size: 0.95rem;
-    color: #777;
-    font-style: italic;
-    line-height: 1.4;
+  font-size: 0.95rem;
+  color: #777;
+  font-style: italic;
+  line-height: 1.4;
 }
 
 /* LOADING STATE */
-#loading { text-align: center; color: #999; margin-top: 50px; }
+#loading {
+  text-align: center;
+  color: #999;
+  margin-top: 50px;
+}
 
 /* MOBILE OPTIMIZATION */
 @media (max-width: 600px) {
-    h1 { font-size: 2.5rem; }
-    .item-row { 
-        grid-template-columns: 1fr; 
-        gap: 8px;
-        padding: 15px 20px;
-    }
-    .pill { font-size: 0.65rem; padding: 4px 8px; margin-bottom: 4px; }
-    .note { font-size: 0.9rem; }
+  h1 {
+    font-size: 2.5rem;
+  }
+  .item-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 15px 20px;
+  }
+  .pill {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+    margin-bottom: 4px;
+  }
+  .note {
+    font-size: 0.9rem;
+  }
+}
+
+
+/* =========================
+   CALM NIGHT SKY
+   ========================= */
+
+.night-sky {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, #05051a, #1a1a3a);
+    z-index: -1; /* Puts it behind everything */
+    overflow: hidden;
+}
+
+/* 1. THE STARS (Static layer) */
+.stars {
+    position: absolute;
+    top: 0; left: 0;
+    
+    /* THE FIX: These must be 1px so the shadows look like dots */
+    width: 2px; height: 2px; 
+    
+    background: transparent;
+    box-shadow: 
+        10vw 10vh 0px white,
+        20vw 50vh 0px white,
+        30vw 20vh 0px white,
+        40vw 80vh 0px white,
+        50vw 10vh 0px white,
+        60vw 60vh 0px white,
+        70vw 30vh 0px white,
+        80vw 90vh 0px white,
+        90vw 40vh 0px white,
+        15vw 70vh 0px white,
+        55vw 25vh 0px white,
+        85vw 15vh 0px white,
+        35vw 95vh 0px white;
+    opacity: 0.6;
+}
+
+/* 2. THE TWINKLING STARS (Animated layer) */
+.twinkling {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: transparent;
+    /* Different set of stars */
+    box-shadow: 
+        5vw 5vh 2px white,
+        25vw 25vh 1px white,
+        45vw 15vh 2px white,
+        65vw 35vh 1px white,
+        75vw 75vh 2px white,
+        95vw 55vh 1px white,
+        12vw 82vh 1px white;
+    opacity: 0;
+    animation: twinkle 4s infinite ease-in-out;
+}
+
+/* 3. THE FLOATING CLOUD */
+.cloud-container {
+    position: absolute;
+    top: 15%; 
+    left: -200px;
+    animation: drift 60s linear infinite;
+    opacity: 0.8;
+}
+
+.cloud {
+    width: 200px; height: 60px;
+    background: #2c2c4e;
+    border-radius: 200px;
+    position: relative; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.cloud::after, .cloud::before {
+    content: '';
+    position: absolute;
+    background: inherit;
+    width: 100px; height: 80px;
+    top: -15px; left: 10px;
+    border-radius: 100px;
+    transform: rotate(30deg);
+}
+
+.cloud::after {
+    width: 120px; height: 120px;
+    top: -55px; left: auto; right: 15px;
+}
+
+/* ANIMATIONS */
+@keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+}
+
+@keyframes drift {
+    0% { left: -250px; }
+    100% { left: 100%; }
 }
