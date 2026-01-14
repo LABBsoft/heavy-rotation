@@ -77,6 +77,7 @@ function groupDataByCategory(rows) {
     return grouped;
 }
 
+// NEW: Render the Category View
 function renderCategoryFeed(groupedData) {
     const container = document.getElementById('main-feed');
 
@@ -87,7 +88,7 @@ function renderCategoryFeed(groupedData) {
 
     const html = sortedCategories.map(category => {
         const items = groupedData[category];
-        const [bg, text, border] = getCategoryColor(category);
+        const [bg, text, border] = getCategoryColorDark(category);
         const icon = getCategoryIcon(category);
 
         // Sort items inside category alphabetically
@@ -116,7 +117,7 @@ function renderCategoryFeed(groupedData) {
 
         return `
             <div class="friend-section">
-                <div class="friend-header" style="background-color: ${bg}; color: ${text};">
+                <div class="friend-header" style="background-color: ${bg}; color: #222;">
                     ${icon} &nbsp; ${category}
                 </div>
                 <div class="friend-body">
@@ -328,6 +329,47 @@ function getCategoryColor(category) {
     return ["#F5F5F5", "#444", "#E0E0E0"];
 }
 
+function getCategoryColorDark(category) {
+    const c = category.toLowerCase();
+    
+    // MOONLIT SATURATION (Level 200 Pastels)
+    // [Background, Text, Border]
+    
+    // Concerts/Live: Soft Rose
+    if (c.includes('concert') || c.includes('live')) 
+        return ["#F48FB1", "#880E4F", "#F06292"]; 
+    
+    // Bands: Deep Lavender
+    if (c.includes('band')) 
+        return ["#B39DDB", "#4527A0", "#9575CD"]; 
+
+    // Movies: Sky Blue (Fixed: No longer too light)
+    if (c.includes("movie")) 
+        return ["#81D4FA", "#01579B", "#4FC3F7"]; 
+    
+    // TV: Sage Green
+    if (c.includes("tv")) 
+        return ["#A5D6A7", "#1B5E20", "#81C784"];    
+    
+    // Books: Sunset Orange
+    if (c.includes("book")) 
+        return ["#FFCC80", "#E65100", "#FFB74D"];   
+    
+    // Music: Orchid Purple
+    if (c.includes("song") || c.includes("music")) 
+        return ["#CE93D8", "#4A148C", "#BA68C8"]; 
+    
+    // Games: Blue-Grey Stone
+    if (c.includes("game")) 
+        return ["#B0BEC5", "#263238", "#90A4AE"];   
+    
+    // Photos: Coral
+    if (c.includes("photo")) 
+        return ["#FFAB91", "#BF360C", "#FF8A65"];  
+    
+    // Default: Neutral Grey
+    return ["#EEEEEE", "#212121", "#BDBDBD"];
+}
 // UPDATED: Renders content split by Type (Simple vs Detailed) rather than Category
 function renderCategoryList(categoriesObj) {
     let allSimpleItems = [];
