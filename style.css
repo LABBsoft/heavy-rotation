@@ -409,6 +409,51 @@ h1 {
   }
 }
 
+/* VIEW TOGGLE CONTROLS */
+.view-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.toggle-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.toggle-btn.active {
+    background: white;
+    color: #130F40; /* Dark blue text */
+    border-color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Category View Specific Styles */
+.picker-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #222;
+    margin-left: 10px;
+    opacity: 0.8;
+}
 
 /* =========================
    CALM NIGHT SKY

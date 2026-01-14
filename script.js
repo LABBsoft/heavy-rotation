@@ -2,6 +2,10 @@
  * MODULE: CONFIGURATION
  * Centralized settings for colors and files.
  */
+
+let RAW_DATA = [];
+let CURRENT_VIEW = 'person'; // 'person' or 'category'
+
 const CONFIG = {
     csvFile: '2025_favourites.csv',
 colors: {
@@ -28,27 +32,103 @@ colors: {
  */
 document.addEventListener('DOMContentLoaded', () => {
     Papa.parse(CONFIG.csvFile, {
-        download: true,
-        header: false,
-        skipEmptyLines: true,
-        complete: handleDataLoad,
-        error: (err) => console.error("Error parsing CSV:", err)
+        download: true, header: false, skipEmptyLines: true,
+        complete: handleDataLoad
     });
 });
 
 function handleDataLoad(results) {
-    const loader = document.getElementById('loading');
-    if (loader) loader.style.display = 'none';
+    RAW_DATA = results.data; // Save data globally
 
-    const rawRows = results.data;
-
-    // 1. Calculate and Render Community Highlights
-    const topPicks = getTopFavorites(rawRows);
+    // 1. Render Hall of Fame (Always visible)
+    const topPicks = getTopFavorites(RAW_DATA);
     renderHighlights(topPicks);
 
-    // 2. Group and Render Main Feed
-    const groupedData = groupDataByName(rawRows);
-    renderMainFeed(groupedData);
+    // 2. Render Initial View (Person)
+    switchView('person');
+}
+
+window.switchView = function(viewType) {
+    CURRENT_VIEW = viewType;
+
+    // Update Buttons
+    document.getElementById('btn-person').className = viewType === 'person' ? 'toggle-btn active' : 'toggle-btn';
+    document.getElementById('btn-category').className = viewType === 'category' ? 'toggle-btn active' : 'toggle-btn';
+
+    // Render appropriate view
+    if (viewType === 'person') {
+        const grouped = groupDataByName(RAW_DATA);
+        renderMainFeed(grouped);
+    } else {
+        const grouped = groupDataByCategory(RAW_DATA);
+        renderCategoryFeed(grouped);
+    }
+}
+
+function groupDataByCategory(rows) {
+    const grouped = {};
+    rows.forEach(row => {
+        const [name, category, title, note] = row;
+        if (!name || name === "Name" || !title) return;
+
+        if (!grouped[category]) grouped[category] = [];
+        grouped[category].push({ title, note: note || "", who: name });
+    });
+    return grouped;
+}
+
+function renderCategoryFeed(groupedData) {
+    const container = document.getElementById('main-feed');
+
+    // Sort categories using our weight helper
+    const sortedCategories = Object.keys(groupedData).sort((a, b) => {
+        return getCategoryWeight(a) - getCategoryWeight(b);
+    });
+
+    const html = sortedCategories.map(category => {
+        const items = groupedData[category];
+        const [bg, text, border] = getCategoryColor(category);
+        const icon = getCategoryIcon(category);
+
+        // Sort items inside category alphabetically
+        items.sort((a, b) => a.title.localeCompare(b.title));
+
+        const listHtml = items.map(item => {
+            // Get the picker's color for their badge
+            let pickerColor = "#eee";
+            const configName = Object.keys(CONFIG.colors).find(key => item.who.includes(key));
+            if (configName) pickerColor = CONFIG.colors[configName];
+
+            // If there's a note, show it
+            const noteHtml = item.note ? `<div class="note" style="margin-top:5px;">"${item.note}"</div>` : '';
+
+            return `
+            <div class="item-row ${item.note ? 'detailed' : ''}">
+                <div class="row-content">
+                    <div class="title">
+                        ${item.title} 
+                        <span class="picker-tag" style="background:${pickerColor};">${item.who}</span>
+                    </div>
+                    ${noteHtml}
+                </div>
+            </div>`;
+        }).join('');
+
+        return `
+            <div class="friend-section">
+                <div class="friend-header" style="background-color: ${bg}; color: ${text};">
+                    ${icon} &nbsp; ${category}
+                </div>
+                <div class="friend-body">
+                    <div class="detailed-list">
+                        ${listHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
 }
 
 /**

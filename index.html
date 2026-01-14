@@ -40,14 +40,28 @@
       <section class="highlights-section">
         <div class="hof-header">
           <h3 class="hof-title">2025's Hall of Fame</h3>
-          <p class="hof-subtitle">
-            These standouts had three mentions each
-          </p>
+          <p class="hof-subtitle">These standouts had three mentions each</p>
         </div>
         <div id="highlight-cards" class="highlight-grid"></div>
       </section>
 
-      <div id="loading">Loading the tracks...</div>
+      <div class="view-controls">
+        <button
+          id="btn-person"
+          class="toggle-btn active"
+          onclick="switchView('person')"
+        >
+          By Person
+        </button>
+        <button
+          id="btn-category"
+          class="toggle-btn"
+          onclick="switchView('category')"
+        >
+          By Category
+        </button>
+      </div>
+
       <div id="main-feed"></div>
     </div>
   </body>
