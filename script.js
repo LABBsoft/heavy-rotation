@@ -21,6 +21,7 @@ colors: {
         "Angela Tollis": "#E1F5FE", // Ice Blue
         "Luciano Abbott": "#CFD8DC",// Blue Grey
         "Avery Cole": "#F0F4C3",    // Lime Cream
+        "David Wesley-James": "#F0F4C3",    // Lime Cream
         "Ryan Kasor": "#DCEDC8"     // Moss Mist
     },
     defaultColor: "#eee"
@@ -77,7 +78,7 @@ function groupDataByCategory(rows) {
     return grouped;
 }
 
-// NEW: Render the Category View (Sorted by Popularity)
+// NEW: Render the Category View (With Photo Support)
 function renderCategoryFeed(groupedData) {
     const container = document.getElementById('main-feed');
 
@@ -90,10 +91,10 @@ function renderCategoryFeed(groupedData) {
         const rawItems = groupedData[category];
         const [bg, text, border] = getCategoryColorDark(category);
         const icon = getCategoryIcon(category);
+        const isPhotoCategory = category.toLowerCase().includes('photo');
 
-        // 2. CONSOLIDATE DUPLICATES
+        // 2. CONSOLIDATE DUPLICATES (Same logic as before)
         const consolidatedMap = {};
-
         rawItems.forEach(item => {
             const key = item.title.trim().toLowerCase();
             if (!consolidatedMap[key]) {
@@ -108,55 +109,93 @@ function renderCategoryFeed(groupedData) {
                 consolidatedMap[key].notes.push({ who: item.who, text: item.note });
             }
         });
-
         const items = Object.values(consolidatedMap);
 
         // 3. SORT ITEMS
         items.sort((a, b) => {
+            // Photos: Sort Alphabetical (Filename/Title)
+            if (isPhotoCategory) return a.displayTitle.localeCompare(b.displayTitle);
+            
+            // Standard: Notes Bottom, Popularity Top
             const aHasNotes = a.notes.length > 0;
             const bHasNotes = b.notes.length > 0;
-            
-            // Rule 1: Separation (Notes go to the bottom)
             if (aHasNotes && !bHasNotes) return 1;
             if (!aHasNotes && bHasNotes) return -1;
-            
-            // Rule 2: Popularity (Most references first)
-            // This now applies to BOTH groups (notes and no-notes)
-            if (a.pickers.length !== b.pickers.length) {
-                return b.pickers.length - a.pickers.length; // Descending
-            }
-            
-            // Rule 3: Alphabetical
+            if (a.pickers.length !== b.pickers.length) return b.pickers.length - a.pickers.length;
             return a.displayTitle.localeCompare(b.displayTitle);
         });
 
         // 4. GENERATE HTML
-        const listHtml = items.map(item => {
-            const tagsHtml = item.pickers.map(personName => {
-                let pickerColor = CONFIG.defaultColor;
-                const configName = Object.keys(CONFIG.colors).find(key => personName.includes(key));
-                if (configName) pickerColor = CONFIG.colors[configName];
+        let contentHtml = "";
+
+        if (isPhotoCategory) {
+            // --- RENDER AS PHOTO GALLERY ---
+            const photos = items.map(item => {
+                const isImageFile = item.displayTitle.match(/\.(jpeg|jpg|gif|png)$/i);
                 
-                return `<span class="picker-tag" style="background:${pickerColor};">${personName}</span>`;
-            }).join('');
+                // 1. Generate Tags (Who submitted this?)
+                const tagsHtml = item.pickers.map(personName => {
+                    let pickerColor = CONFIG.defaultColor;
+                    const configName = Object.keys(CONFIG.colors).find(key => personName.includes(key));
+                    if (configName) pickerColor = CONFIG.colors[configName];
+                    return `<span class="picker-tag" style="background:${pickerColor};">${personName}</span>`;
+                }).join('');
 
-            const notesHtml = item.notes.map(noteObj => 
-                `<div class="note" style="margin-top:8px;">
-                    <strong>${noteObj.who}:</strong> "${noteObj.text}"
-                </div>`
-            ).join('');
+                // 2. Generate Caption (Notes + Tags)
+                const notesHtml = item.notes.map(n => `<div>"${n.text}"</div>`).join('');
+                const captionHtml = `
+                    <div class="photo-caption">
+                        <div style="margin-bottom:10px;">${tagsHtml}</div>
+                        ${notesHtml ? `<div style="margin-bottom:5px;">${notesHtml}</div>` : ''}
+                        ${!isImageFile ? `<div>${item.displayTitle}</div>` : ''} 
+                    </div>`;
 
-            return `
-            <div class="item-row ${item.notes.length > 0 ? 'detailed' : ''}">
-                <div class="row-content">
-                    <div class="title" style="line-height: 1.8;">
-                        ${item.displayTitle} 
-                        ${tagsHtml}
+                // 3. Render Image
+                const visualContent = isImageFile 
+                    ? `<img src="photos/${item.displayTitle}" alt="Photo" class="photo-img" onclick="openLightbox(this.src)">`
+                    : `<div class="photo-placeholder"><span>${item.displayTitle}</span></div>`;
+
+                return `
+                    <div class="photo-card">
+                        <div class="photo-frame">
+                            ${visualContent}
+                        </div>
+                        ${captionHtml}
                     </div>
-                    ${notesHtml}
-                </div>
-            </div>`;
-        }).join('');
+                `;
+            }).join('');
+            
+            // Wrap in the photo grid container
+            contentHtml = `<div class="photo-section" style="border:none;"><div class="photo-grid">${photos}</div></div>`;
+
+        } else {
+            // --- RENDER AS STANDARD LIST ---
+            contentHtml = `<div class="detailed-list">` + items.map(item => {
+                const tagsHtml = item.pickers.map(personName => {
+                    let pickerColor = CONFIG.defaultColor;
+                    const configName = Object.keys(CONFIG.colors).find(key => personName.includes(key));
+                    if (configName) pickerColor = CONFIG.colors[configName];
+                    return `<span class="picker-tag" style="background:${pickerColor};">${personName}</span>`;
+                }).join('');
+
+                const notesHtml = item.notes.map(noteObj => 
+                    `<div class="note" style="margin-top:8px;">
+                        <strong>${noteObj.who}:</strong> "${noteObj.text}"
+                    </div>`
+                ).join('');
+
+                return `
+                <div class="item-row ${item.notes.length > 0 ? 'detailed' : ''}">
+                    <div class="row-content">
+                        <div class="title" style="line-height: 1.8;">
+                            ${item.displayTitle} 
+                            ${tagsHtml}
+                        </div>
+                        ${notesHtml}
+                    </div>
+                </div>`;
+            }).join('') + `</div>`;
+        }
 
         return `
             <div class="friend-section">
@@ -164,9 +203,7 @@ function renderCategoryFeed(groupedData) {
                     ${icon} &nbsp; ${category}
                 </div>
                 <div class="friend-body">
-                    <div class="detailed-list">
-                        ${listHtml}
-                    </div>
+                    ${contentHtml}
                 </div>
             </div>
         `;
@@ -336,11 +373,12 @@ function getCategoryWeight(category) {
     if (c.includes('movie')) return 1;
     if (c.includes('tv') || c.includes('show') || c.includes('anime')) return 2;
     if (c.includes('book')) return 3;
-    if (c.includes('game')) return 9;
     if (c.includes('album')) return 5;
     if (c.includes('song')) return 6;
     if (c.includes('artist')) return 7;
-    if (c.includes('photo')) return 8;
+    if (c.includes('concert')) return 8;
+    if (c.includes('game')) return 9;
+    if (c.includes('photo')) return 11;
     return 99; // Everything else (e.g. "Other") goes to the end
 }
 
@@ -417,34 +455,45 @@ function getCategoryColorDark(category) {
 function renderCategoryList(categoriesObj) {
     let allSimpleItems = [];
     let allDetailedItems = [];
+    let allPhotoItems = [];
 
-    // 1. Flatten the data
+    // 1. Flatten and Split Data
     Object.keys(categoriesObj).forEach(category => {
         const items = categoriesObj[category];
+        
         items.forEach(item => {
             const itemWithCat = { ...item, category };
-            if (!item.note || item.note.trim() === "") {
+            const isPhoto = category.toLowerCase().includes('photo');
+
+            if (isPhoto) {
+                // PHOTOS: Always go to the special photo array
+                allPhotoItems.push(itemWithCat);
+            } else if (!item.note || item.note.trim() === "") {
+                // SIMPLE: No note, not a photo
                 allSimpleItems.push(itemWithCat);
             } else {
+                // DETAILED: Has note, not a photo
                 allDetailedItems.push(itemWithCat);
             }
         });
     });
 
-    // 2. SORTING LOGIC (Category Weight -> Alphabetical Title)
+    // 2. SORTING (Apply the same sort logic as before)
     const sortFn = (a, b) => {
         const wA = getCategoryWeight(a.category);
         const wB = getCategoryWeight(b.category);
-        if (wA !== wB) return wA - wB; // Sort by category priority
-        return a.title.localeCompare(b.title); // Then by title
+        if (wA !== wB) return wA - wB;
+        return a.title.localeCompare(b.title);
     };
 
     allSimpleItems.sort(sortFn);
     allDetailedItems.sort(sortFn);
+    // Photos don't need category sort usually, but we can sort by title
+    allPhotoItems.sort((a, b) => a.title.localeCompare(b.title));
 
     let html = "";
 
-    // 3. RENDER THE UNIFIED CLOUD
+    // 3. RENDER PILL CLOUD
     if (allSimpleItems.length > 0) {
         const pills = allSimpleItems.map(item => {
             const icon = getCategoryIcon(item.category);
@@ -460,7 +509,7 @@ function renderCategoryList(categoriesObj) {
         html += `<div class="pill-cloud">${pills}</div>`;
     }
 
-    // 4. RENDER THE DETAILED ROWS
+    // 4. RENDER DETAILED ROWS
     if (allDetailedItems.length > 0) {
         const rows = allDetailedItems.map(item => {
             const icon = getCategoryIcon(item.category);
@@ -477,6 +526,35 @@ function renderCategoryList(categoriesObj) {
         
         const borderClass = allSimpleItems.length > 0 ? "border-top" : "";
         html += `<div class="detailed-list ${borderClass}">${rows}</div>`;
+    }
+
+    // 5. RENDER PHOTO CARDS (New Section)
+    if (allPhotoItems.length > 0) {
+        const photos = allPhotoItems.map(item => {
+            // Check if title looks like a file path
+            const isImageFile = item.title.match(/\.(jpeg|jpg|gif|png)$/i);
+            
+            // Render Image or Text Placeholder
+            const visualContent = isImageFile 
+                ? `<img src="photos/${item.title}" alt="Photo" class="photo-img" onclick="openLightbox(this.src)">`
+                : `<div class="photo-placeholder"><span>${item.title}</span></div>`;
+            
+            const noteHtml = item.note ? `<div class="photo-caption">${item.note}</div>` : '';            return `
+                <div class="photo-card">
+                    <div class="photo-frame">
+                        ${visualContent}
+                    </div>
+                    ${noteHtml}
+                </div>
+            `;
+        }).join('');
+
+        // Add a header/divider for the photos
+        html += `
+            <div class="photo-section">
+                <div class="photo-grid">${photos}</div>
+            </div>
+        `;
     }
 
     return html;
