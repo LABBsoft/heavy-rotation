@@ -561,7 +561,7 @@ h1 {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100dvh;
+  width: 100vw;
   height: 100dvh;
   background: linear-gradient(to bottom, #05051a, #1a1a3a);
   z-index: -1; /* Puts it behind everything */
